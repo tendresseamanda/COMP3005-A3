@@ -3,6 +3,8 @@ PROJECT: Database Interaction with PostgreSQL and Application Programming
 
 DESCRIPTION: This program demonstrates CRUD operations using C and PostgreSQL.
 
+VIDEO DEMONSTRATION: https://drive.google.com/file/d/1ZPevI_bZMuVBkB09H9eGLgiDs_LfCcQc/view?usp=sharing
+
 REQUIREMENTS:
 
     PostgreSQL 18
