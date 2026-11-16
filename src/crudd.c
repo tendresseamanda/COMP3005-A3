@@ -5,9 +5,10 @@
 
  //Retrieves and displays all records from the students table.
 void getAllStudents(PGconn *conn){
+     // Execute SELECT query
     PGresult *res = PQexec(conn, "SELECT * FROM students;");
     
-    //check result
+    //check result/whether query executed successfully
     if (PQresultStatus(res) != PGRES_COMMAND_OK && PQresultStatus(res) != PGRES_TUPLES_OK){
         fprintf(stderr, "%s\n", PQerrorMessage(conn));
         PQclear(res);
@@ -15,10 +16,12 @@ void getAllStudents(PGconn *conn){
         exit(1);
     }
 
+    //Get the total number of rows returned
     int rows = PQntuples(res);
 
     printf("\nStudents:\n");
 
+    //Display each student record
     for(int i = 0; i < rows; i++){
         printf("%s %s %s %s\n",
             PQgetvalue(res, i, 0),
@@ -27,14 +30,16 @@ void getAllStudents(PGconn *conn){
             PQgetvalue(res, i, 3));
     }
 
+    //Free memory from  query result
     PQclear(res);
 }
 
 //Inserts a new student record into the students table.
 void addStudent(PGconn *conn, char *first_name, char *last_name, char *email, char *enrollment_date){
-
+ 
     const char *query = "INSERT INTO students (first_name, last_name, email, enrollment_date) VALUES ($1, $2, $3, $4)";
 
+    // Stores function parameters in an array for PQexecParams
     const char *paramValues[4] = {
         first_name,
         last_name,
@@ -42,9 +47,10 @@ void addStudent(PGconn *conn, char *first_name, char *last_name, char *email, ch
         enrollment_date
     };
 
+     // Execute parameterized INSERT query
     PGresult *res = PQexecParams(conn, query, 4, NULL, paramValues, NULL, NULL, 0);
 
-    //check result
+    //check result/whether query executed successfully
     if (PQresultStatus(res) != PGRES_COMMAND_OK && PQresultStatus(res) != PGRES_TUPLES_OK){
         fprintf(stderr, "%s\n", PQerrorMessage(conn));
         PQclear(res);
@@ -52,6 +58,7 @@ void addStudent(PGconn *conn, char *first_name, char *last_name, char *email, ch
         exit(1);
     }
 
+    //Free memory from  query result
     PQclear(res);
     printf("Student added successfully. \n");
 }
@@ -59,17 +66,16 @@ void addStudent(PGconn *conn, char *first_name, char *last_name, char *email, ch
 //Updates the email address for a student with the specified student_id.
 void updateStudentEmail(PGconn *conn, char *student_id, char *new_email){
     const char *query = "UPDATE students SET email = $1 WHERE student_id = $2";
-
-    //UPDATE list SET email = 'new_email' WHERE student_id = student_id;
     
+ // Stores new email and student ID in an array for PQexecParams
     const char *paramValues[2] = {
         new_email,
         student_id
     };
-
+ // Execute UPDATE query
     PGresult *res = PQexecParams(conn, query, 2, NULL, paramValues, NULL, NULL, 0);
 
-    //check result
+    //check result/whether query executed successfully
     if (PQresultStatus(res) != PGRES_COMMAND_OK && PQresultStatus(res) != PGRES_TUPLES_OK){
         fprintf(stderr, "%s\n", PQerrorMessage(conn));
         PQclear(res);
@@ -85,13 +91,15 @@ void updateStudentEmail(PGconn *conn, char *student_id, char *new_email){
 void deleteStudent(PGconn *conn, char *student_id){
     const char *query = "DELETE FROM students WHERE student_id = $1";
 
+ // Stores function parameters in an array for PQexecParams
     const char *paramValues[1] = {
         student_id
     };
 
+  //Execute parameterized DELETE query
     PGresult *res = PQexecParams(conn, query, 1, NULL, paramValues, NULL, NULL, 0);
 
-    //check result
+    //check result/whether query executed successfully
     if (PQresultStatus(res) != PGRES_COMMAND_OK && PQresultStatus(res) != PGRES_TUPLES_OK){
         fprintf(stderr, "%s\n", PQerrorMessage(conn));
         PQclear(res);
@@ -106,7 +114,7 @@ void deleteStudent(PGconn *conn, char *student_id){
 
 
 int main(){
-   //establish connection to our students database
+   //establish connection to the PostgreSQL database
     PGconn *conn = PQconnectdb( //makes a new connection to the database server
         "host=localhost "
         "dbname=studentdb "
@@ -114,23 +122,25 @@ int main(){
         "password=momrules"
     );
 
-    //check connection status
+    //Check that connection to database was successful
 
     if (PQstatus(conn) != CONNECTION_OK){
         printf("Connection failed.");
         return 1;
     };
 
+    //Test CRUD operations
     getAllStudents(conn);
-    addStudent(conn, "tendresse", "umuhire", "tendresseumuhire@cmail.carleton.ca", "2026-11-15");
-    getAllStudents(conn);
-
-    updateStudentEmail(conn, "4", "newemail@gnail.com");
+    addStudent(conn, "tendresse "umuhire "tendresseU@gmail.com", "2026-11-15");
     getAllStudents(conn);
 
-    //deleteStudent(conn, "2");
-    //getAllStudents(conn);
+    updateStudentEmail(conn, "4", "newemail@gmail.com");
+    getAllStudents(conn);
 
+    deleteStudent(conn, "2");
+    getAllStudents(conn);
+
+    Close data base connection
     PQfinish(conn);
 
 
